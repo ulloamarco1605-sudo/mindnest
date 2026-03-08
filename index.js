@@ -11,6 +11,56 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static('.'));
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Mindnest Prototype</title>
+        <style>
+            body { background: #121212; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+            #app { width: 400px; background: #1e1e1e; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+            #chat { height: 300px; overflow-y: auto; margin-bottom: 10px; padding: 10px; border-bottom: 1px solid #333; text-align: left; }
+            input { width: 100%; padding: 12px; background: #2a2a2a; border: none; color: white; border-radius: 8px; box-sizing: border-box; outline: none; }
+            .nesti { color: #4ade80; margin: 10px 0; }
+            .user { color: #60a5fa; text-align: right; margin: 10px 0; }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+            <h2>Mindnest: Nesti</h2>
+            <div id="chat"></div>
+            <input type="text" id="input" placeholder="Type to Nesti..." onkeypress="if(event.key==='Enter') send()">
+        </div>
+        <script>
+            async function send() {
+                const input = document.getElementById('input');
+                const chat = document.getElementById('chat');
+                const val = input.value;
+                if(!val) return;
+                chat.innerHTML += '<div class="user">' + val + '</div>';
+                input.value = '';
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ messages: [{role:'user', content: val}] })
+                });
+                const data = await res.json();
+                chat.innerHTML += '<div class="nesti"><b>Nesti:</b> ' + data.text + '</div>';
+                
+                const voice = await fetch('/api/speak', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ text: data.text })
+                });
+                const blob = await voice.blob();
+                new Audio(URL.createObjectURL(blob)).play();
+            }
+        </script>
+    </body>
+    </html>
+  `);
+});
 
 const PORT = 3001;
 
