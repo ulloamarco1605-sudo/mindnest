@@ -1,45 +1,41 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!DOCTYPE html>
 <html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.7">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Times; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-  </style>
+    <title>Mindnest Prototype</title>
+    <style>
+        body { font-family: sans-serif; padding: 40px; text-align: center; background: #f0f2f5; }
+        #chat-box { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        #messages { height: 300px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 20px; text-align: left; }
+        input { width: 70%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;&lt;title&gt;Mindnest Prototype&lt;/title&gt;&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body style="font-family: sans-serif; padding: 20px; text-align: center;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h1&gt;Talk to Nesti&lt;/h1&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="chat" style="height: 200px; border: 1px solid #ccc; margin-bottom: 10px; padding: 10px; overflow-y: auto;"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;input type="text" id="msg" placeholder="Type here..."&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button onclick="send()"&gt;Send&lt;/button&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;script&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>async function send() {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const input = document.getElementById('msg');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const chat = document.getElementById('chat');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const text = input.value;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>chat.innerHTML += `&lt;div&gt;&lt;b&gt;You:&lt;/b&gt; ${text}&lt;/div&gt;`;</span></p>
-<p class="p2"><span class="s1"><span class="Apple-converted-space">            </span></span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const res = await fetch('/api/chat', {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>method: 'POST',</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>headers: {'Content-Type': 'application/json'},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">                </span>body: JSON.stringify({ messages: [{role: 'user', content: text}] })</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>const data = await res.json();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>chat.innerHTML += `&lt;div style="color:green"&gt;&lt;b&gt;Nesti:&lt;/b&gt; ${data.text}&lt;/div&gt;`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">            </span>input.value = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+    <div id="chat-box">
+        <h1>Talk to Nesti</h1>
+        <div id="messages"></div>
+        <input type="text" id="msg" placeholder="Type a message...">
+        <button onclick="send()">Send</button>
+    </div>
+
+    <script>
+        async function send() {
+            const input = document.getElementById('msg');
+            const messages = document.getElementById('messages');
+            const text = input.value;
+            if(!text) return;
+
+            messages.innerHTML += `<div><b>You:</b> ${text}</div>`;
+            input.value = '';
+
+            const res = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ messages: [{role: 'user', content: text}] })
+            });
+            const data = await res.json();
+            messages.innerHTML += `<div style="color:green"><b>Nesti:</b> ${data.text}</div>`;
+        }
+    </script>
 </body>
 </html>
